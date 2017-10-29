@@ -3,62 +3,109 @@ require_relative 'position_data_validator'
 
 class ToyRobot
   include PositionDataValidator
-  attr_accessor :directions, :valid_commands
 
-  def initialize
-    @directions = ['north', 'east', 'south', 'west']
-  end
+  attr_accessor :position_and_facing
 
-  private
-
-  def place(position_data)
-    position = position_data.split(',') # => '0,3,west'
-  end
-
-  def move(position)
-    {
-      'east' => [0, 1],
-      'west' => [0, -1],
-      'north' => [1, 1],
-      'south' => [1, -1],
-    }.each do |direction, axis_and_movement|
-      axis = axis_and_movement[0]
-      movement = axis_and_movement[1]
-      if position[2] == direction
-        move_unless_at_edge(position, axis, movement)
+  def send_method(command, position_data)
+    if command
+      if valid_place_command_has_been_issued? && !off_table?
+        send(command)
+      else
+        send(command, position_data)
       end
     end
   end
 
-  def move_unless_at_edge(position, axis, movement)
-    hypotethical_move = position[axis].to_i + movement
-    unless hypotethical_move > 50 || hypotethical_move < 0
-      position[axis] = hypotethical_move
+  private
+
+  def valid_place_command_has_been_issued?
+    !position_and_facing.nil?
+  end
+
+  def place(position_data) #=> {x: 0, y: 1, facing: west}
+    @position_and_facing = 
+    {
+      x: position_data[0].to_i,
+      y: position_data[1].to_i,
+      facing: position_data[2].downcase
+    }
+  end
+
+  def right
+    change_direction({
+      'north' => 'east',
+      'east' => 'east',
+      'south' => 'east',
+      'west' => 'north',
+    })
+  end
+
+  def left
+    change_direction({
+      'north' => 'west',
+      'east' => 'north',
+      'south' => 'west',
+      'west' => 'west',
+    })
+  end
+
+  def change_direction(directions_hash)
+    directions_hash.each do |current_direction, new_direction|
+      if position_and_facing[:facing] == current_direction
+        position_and_facing[:facing] = new_direction
+      end
     end
   end
 
-  def left(position)
-    change_direction(position, -1)
+  def report
+    print position_and_facing.values
   end
 
-  def right(position)
-    change_direction(position, 1)
+  #   x:0,y:5         x:5,y:5
+  #    +----------------+
+  #    |                |
+  #    |                |
+  #    |                |
+  #    |                |
+  #    |                |
+  #    |                |
+  #    +----------------+
+  #   x:0,y:0        x:5,y:0
+
+  def move
+    {
+      'east'  =>  {x: 1,  y: 0},
+      'west'  =>  {x: -1, y: 0},
+      'north' =>  {x: 0,  y: 1},
+      'south' =>  {x: 0,  y: -1}
+    }.each do |direction, coordinates_movement|
+      if position_and_facing[:facing] == direction
+        unless at_edge_facing_outward?(direction)
+          position_and_facing[:x] += coordinates_movement[:x]
+          position_and_facing[:y] += coordinates_movement[:y]
+        end
+      end
+    end
   end
 
-  def change_direction(position, increment) # NEED TO CAHNGE SO THAT NORTH AND EAST ARE TREATED The same
-    index = directions.index(position[2])
-    position[2] = directions.rotate(increment)[index]
-    position
+  def at_edge_facing_outward?(direction)
+    facing_coordinate = {
+      'east'  =>  {x: 5},
+      'west'  =>  {x: 0},
+      'north' =>  {y: 5},
+      'south' =>  {y: 0}
+    }[direction]
+    border_axis = facing_coordinate.keys.join('').to_sym
+    border_coordinate = facing_coordinate.values.join('').to_i
+    current_coordinate = position_and_facing[border_axis]
+    current_coordinate == border_coordinate #> 5 || coordinate < 0
   end
 
-  def report(position)
-    print position
-    position
-  end
-
-  def off_table?(position) # if not on table toy_robot can choose to ignore commands.
-    [0,1].map do |axis|
-      return true if position[axis].to_i < 0 || 50 < position[axis].to_i
-    end.include? true
+  def off_table?
+    unless position_and_facing.nil?
+      [:x, :y].map do |axis|
+        position_and_facing[axis] < 0 || 5 < position_and_facing[axis]
+      end.include? true
+    end
   end
 end

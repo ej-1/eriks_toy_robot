@@ -10,6 +10,5 @@ require 'pry'
 loop do
 	command_line_input = gets.chomp
 	@command_runner.run_command(command_line_input, @toy_robot)
-	binding.pry
 	#break if command_line_input == 'exit'
 end

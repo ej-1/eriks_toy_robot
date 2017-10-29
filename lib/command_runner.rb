@@ -5,6 +5,6 @@ class CommandRunner
 
 	def run_command(command_line_input, toy_robot)
 		command, position_data = parse_and_validate_input(command_line_input)
-		#toy_robot.send(command, position_data)
+		toy_robot.send_method(command, position_data)
 	end
 end
