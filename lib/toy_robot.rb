@@ -8,7 +8,7 @@ class ToyRobot
 
   def send_method(command, position_data)
     if command
-      if valid_place_command_has_been_issued? && !off_table?
+      if valid_place_command_has_been_issued? && on_table?
         send(command)
       else
         send(command, position_data)
@@ -50,11 +50,8 @@ class ToyRobot
   end
 
   def change_direction(directions_hash)
-    directions_hash.each do |current_direction, new_direction|
-      if position_and_facing[:facing] == current_direction
-        position_and_facing[:facing] = new_direction
-      end
-    end
+    new_direction = directions_hash[position_and_facing[:facing]]
+    position_and_facing[:facing] = new_direction
   end
 
   def report
@@ -72,19 +69,22 @@ class ToyRobot
   #    +----------------+
   #   x:0,y:0        x:5,y:0
 
-  def move
+  def movement_instructions
     {
+      #'facing' => how to change current x and y coordinates.
       'east'  =>  {x: 1,  y: 0},
       'west'  =>  {x: -1, y: 0},
       'north' =>  {x: 0,  y: 1},
       'south' =>  {x: 0,  y: -1}
-    }.each do |direction, coordinates_movement|
-      if position_and_facing[:facing] == direction
-        unless at_edge_facing_outward?(direction)
-          position_and_facing[:x] += coordinates_movement[:x]
-          position_and_facing[:y] += coordinates_movement[:y]
-        end
-      end
+    }
+  end
+
+  def move
+    facing = position_and_facing[:facing]
+    movement = movement_instructions[facing]
+    unless at_edge_facing_outward?(facing)
+      position_and_facing[:x] += movement[:x]
+      position_and_facing[:y] += movement[:y]
     end
   end
 
@@ -98,14 +98,12 @@ class ToyRobot
     border_axis = facing_coordinate.keys.join('').to_sym
     border_coordinate = facing_coordinate.values.join('').to_i
     current_coordinate = position_and_facing[border_axis]
-    current_coordinate == border_coordinate #> 5 || coordinate < 0
+    current_coordinate == border_coordinate
   end
 
-  def off_table?
+  def on_table?
     unless position_and_facing.nil?
-      [:x, :y].map do |axis|
-        position_and_facing[axis] < 0 || 5 < position_and_facing[axis]
-      end.include? true
+      position_and_facing[:x].between?(0, 5) && position_and_facing[:x].between?(0, 5)
     end
   end
 end
