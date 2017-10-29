@@ -7,40 +7,12 @@ class ToyRobot
 
   def initialize
     @directions = ['north', 'east', 'south', 'west']
-    @valid_commands = ['place', 'left', 'right', 'move', 'report']
-    handle_input([])
-    #place
   end
 
   private
 
-  def handle_input(position)
-    input_array = gets.chomp.split(' ')
-    command = input_array.first # => 'MOVE'
-    if command.downcase == 'place'
-      unless input_array.first == input_array.last # that only place is issues and no postion data
-        place(input_array.last)
-      end
-    end
-    # handle if multiple commands of wrong spelling, without killing program.
-    if valid_position_data?(position)
-      if off_table?(position)
-        handle_input(position)
-      else
-        valid_commands.each do |valid_command|
-          if command.downcase == command_string
-            send("#{command_string}", position)
-          end
-        end
-      end
-    else
-      handle_input(position)
-    end
-  end
-
   def place(position_data)
     position = position_data.split(',') # => '0,3,west'
-    handle_input(position)
   end
 
   def move(position)
@@ -56,7 +28,6 @@ class ToyRobot
         move_unless_at_edge(position, axis, movement)
       end
     end
-    handle_input(position)
   end
 
   def move_unless_at_edge(position, axis, movement)
@@ -67,11 +38,11 @@ class ToyRobot
   end
 
   def left(position)
-    handle_input(change_direction(position, -1))
+    change_direction(position, -1)
   end
 
   def right(position)
-    handle_input(change_direction(position, 1))
+    change_direction(position, 1)
   end
 
   def change_direction(position, increment) # NEED TO CAHNGE SO THAT NORTH AND EAST ARE TREATED The same
@@ -82,7 +53,7 @@ class ToyRobot
 
   def report(position)
     print position
-    handle_input(position)
+    position
   end
 
   def off_table?(position) # if not on table toy_robot can choose to ignore commands.
@@ -91,5 +62,3 @@ class ToyRobot
     end.include? true
   end
 end
-
-ToyRobot.new
