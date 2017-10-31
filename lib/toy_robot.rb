@@ -27,7 +27,7 @@ class ToyRobot
     {
       x: position_data[0].to_i,
       y: position_data[1].to_i,
-      facing: position_data[2].downcase
+      facing: position_data[2]
     }
   end
 

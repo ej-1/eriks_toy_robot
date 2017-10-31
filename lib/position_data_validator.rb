@@ -1,10 +1,8 @@
 module PositionDataValidator
   def valid_position_data?(position_array)
-    if valid_number_of_arguments?(position_array)
-      valid_x_and_y_coordinates?(position_array) && valid_facing?(position_array)
-    else
-      false
-    end
+    valid_number_of_arguments?(position_array) &&
+      valid_x_and_y_coordinates?(position_array) &&
+      valid_facing?(position_array)
   end
 
   def valid_number_of_arguments?(position_array)

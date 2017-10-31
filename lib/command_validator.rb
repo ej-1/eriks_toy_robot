@@ -9,7 +9,7 @@ module CommandValidator
 
   def parse_and_validate_input(input)
     command, position_data = parse_input(input)
-    if is_place_command?(command) && valid_position_data?(position_data) # TOY_ROBOT SHOULD CHECK IF PLLACE COMMAND
+    if is_place_command?(command) && valid_position_data?(position_data)
       return command, position_data
     else
       return valid_command?(command)
@@ -28,11 +28,6 @@ module CommandValidator
   end
 
   def valid_command?(command)
-    valid_commands.each do |valid_command|
-      if command == valid_command
-        return command
-      end
-    end
-    nil
+    valid_commands.find { |valid_command| command === valid_command }
   end
 end
