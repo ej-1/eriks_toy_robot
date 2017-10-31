@@ -12,3 +12,5 @@
 
 * To run all test
 ´bundle exec rspec´
+
+* Run application with `ruby main.rb`
