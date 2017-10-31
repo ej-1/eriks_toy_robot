@@ -1,24 +1,14 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+* Ruby version 2.4.1
 
-Things you may want to cover:
+* Some assumptions I've made from the instructions
+ - turning 90 degrees to the right or left is NOT meant to be done
+   in a clockwise or counter-clockwise fashion.
 
-* Ruby version
+ - the class can receive coordinates which are outside of the table,
+   but I don't count that as it falling off the table, simply that it is put
+   off the table and can then ignore commands.
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+* To run all test
+´bundle exec rspec´
