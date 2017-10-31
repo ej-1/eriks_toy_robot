@@ -5,23 +5,23 @@ require 'command_runner.rb'
 
 RSpec.describe CommandRunner, 'CommandRunner' do
 
-  describe 'PLACE command' do
+  describe 'run PLACE command' do
 
     before do
       @toy_robot = ToyRobot.new
       @command_runner = CommandRunner.new
     end
 
-    context 'run as initial commmand' do
-      it 'places and reports toy_robot' do
+    context 'as initial commmand' do
+      it 'places and reports toy_robot position and facing' do
         @command_runner.run_command('place 0,3,west', @toy_robot)
         STDOUT.should_receive(:puts).with([0, 3, "west"])
         @command_runner.run_command('report', @toy_robot)
       end
     end
 
-    context 'run as a subsequent commmand' do
-      it 'places and reports toy_robot' do
+    context 'as a subsequent commmand' do
+      it 'places and reports toy_robot position and facing' do
         @command_runner.run_command('move', @toy_robot)
         @command_runner.run_command('left', @toy_robot)
         @command_runner.run_command('right', @toy_robot)
@@ -62,7 +62,7 @@ RSpec.describe CommandRunner, 'CommandRunner' do
     end
   end
 
-  describe 'LEFT command' do
+  describe 'run LEFT command' do
 
     before do
       @toy_robot = ToyRobot.new
@@ -85,7 +85,7 @@ RSpec.describe CommandRunner, 'CommandRunner' do
     end
   end
 
-  describe 'RIGHT command' do
+  describe 'run RIGHT command' do
 
     before do
       @toy_robot = ToyRobot.new
@@ -108,7 +108,7 @@ RSpec.describe CommandRunner, 'CommandRunner' do
     end
   end
 
-  describe 'MOVE command' do
+  describe 'run MOVE command' do
 
     before do
       @toy_robot = ToyRobot.new
