@@ -15,29 +15,29 @@ RSpec.describe CommandValidator, '#runs CommandValidator' do
     end
 
     it 'receives valid PLACE command with gibberish' do
-      expect(@object.parse_and_validate_input('place f,b,layt')).to eq('place')
+      expect(@object.parse_and_validate_input('PLACE f,b,layt')).to eq(['PLACE', nil])
     end
   end
 
   context 'CommandValidator receives valid input' do
     it 'receives PLACE input' do
-      expect(@object.parse_and_validate_input('place 0,3,west')).to eq(['place', ['0', '3', 'west']])
+      expect(@object.parse_and_validate_input('PLACE 0,3,WEST')).to eq(['PLACE', {:x=>0, :y=>3, :facing=>'WEST'}])
     end
 
     it 'receives MOVE command' do
-      expect(@object.parse_and_validate_input('move')).to eq('move')
+      expect(@object.parse_and_validate_input('MOVE')).to eq(['MOVE', nil])
     end
 
     it 'receives REPORT command' do
-      expect(@object.parse_and_validate_input('report')).to eq('report')
+      expect(@object.parse_and_validate_input('REPORT')).to eq(['REPORT', nil])
     end
 
     it 'receives RIGHT command' do
-      expect(@object.parse_and_validate_input('right')).to eq('right')
+      expect(@object.parse_and_validate_input('RIGHT')).to eq(['RIGHT', nil])
     end
 
     it 'receives LEFT command' do
-      expect(@object.parse_and_validate_input('left')).to eq('left')
+      expect(@object.parse_and_validate_input('LEFT')).to eq(['LEFT', nil])
     end
   end
 end
