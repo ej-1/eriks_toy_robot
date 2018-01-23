@@ -2,7 +2,6 @@ module PositionDataValidator
   DIRECTIONS = ['NORTH', 'WEST', 'EAST', 'SOUTH']
 
   def valid_position_data?(position_array)
-    binding.pry
     valid_number_of_arguments?(position_array) &&
       valid_x_and_y_coordinates?(position_array) &&
       valid_facing?(position_array)
