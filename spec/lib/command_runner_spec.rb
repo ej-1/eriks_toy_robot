@@ -8,28 +8,30 @@ RSpec.describe CommandRunner, 'CommandRunner' do
   describe 'run PLACE command' do
 
     before do
-      @toy_robot = ToyRobot.new
+      @board = Board.new(4, 4)
       @command_runner = CommandRunner.new
     end
 
     context 'as initial commmand' do
-      it 'places and reports toy_robot position and facing' do
-        @command_runner.run_command('place 0,3,west', @toy_robot)
-        STDOUT.should_receive(:puts).with([0, 3, "west"])
-        @command_runner.run_command('report', @toy_robot)
+      it 'PLACEs and reports toy_robot position and facing' do
+        @command_runner.run_command('PLACE', {:x=>0, :y=>3, :facing=>"WEST"}, @board)
+        STDOUT.should_receive(:puts).with([0, 3, 'WEST'])
+        @command_runner.run_command('REPORT', nil, @board)
       end
     end
 
     context 'as a subsequent commmand' do
-      it 'places and reports toy_robot position and facing' do
-        @command_runner.run_command('move', @toy_robot)
-        @command_runner.run_command('left', @toy_robot)
-        @command_runner.run_command('right', @toy_robot)
-        @command_runner.run_command('move', @toy_robot)
-        expect(@toy_robot.position_and_facing).to eq(nil)
-        @command_runner.run_command('place 0,3,east', @toy_robot)
-        STDOUT.should_receive(:puts).with([0, 3, "east"])
-        @command_runner.run_command('report', @toy_robot)
+      # This spec is a bit more like a integration test.
+      it 'PLACEs and reports toy_robot position and facing' do
+        STDOUT.should_receive(:puts).with('NO TOY ROBOT HAS BEEN PLACED!').exactly(4).times
+        @command_runner.run_command('MOVE', nil, @board)
+        @command_runner.run_command('LEFT', nil, @board)
+        @command_runner.run_command('RIGHT', nil, @board)
+        @command_runner.run_command('MOVE', nil, @board)
+        #expect(@toy_robot.position_and_facing).to eq(nil)
+        @command_runner.run_command('PLACE', {:x=>0, :y=>3, :facing=>'WEST'}, @board)
+        STDOUT.should_receive(:puts).with([0, 3, 'WEST'])
+        @command_runner.run_command('REPORT', nil, @board)
       end
     end
   end
@@ -37,27 +39,31 @@ RSpec.describe CommandRunner, 'CommandRunner' do
   describe 'Commands sent to ToyRobot that is off table' do
 
     before do
-      @toy_robot = ToyRobot.new
+      @board = Board.new(4, 4)
       @command_runner = CommandRunner.new
     end
 
     context 'robot is outside of table x-axis' do
       it 'ignores MOVE, LEFT, RIGHT and REPORT commands' do
-        @command_runner.run_command('place 6,0,east', @toy_robot)
-        @command_runner.run_command('move', @toy_robot)
-        @command_runner.run_command('left', @toy_robot)
-        @command_runner.run_command('right', @toy_robot)
-        expect(@toy_robot.position_and_facing).to eq({:x=>6, :y=>0, :facing=>"east"})
+        @toy_robot = @command_runner.run_command('PLACE', {:x=>6, :y=>0, :facing=>'EAST'}, @board)
+        @command_runner.run_command('MOVE', nil, @board)
+        @command_runner.run_command('LEFT', nil, @board)
+        @command_runner.run_command('RIGHT', nil, @board)
+        expect(@toy_robot.x).to eq(6)
+        expect(@toy_robot.y).to eq(0)
+        expect(@toy_robot.facing).to eq('EAST')
       end
     end
 
     context 'robot is outside of table y-axis' do
       it 'ignores MOVE, LEFT, RIGHT and REPORT commands' do
-        @command_runner.run_command('place 0,6,east', @toy_robot)
-        @command_runner.run_command('move', @toy_robot)
-        @command_runner.run_command('left', @toy_robot)
-        @command_runner.run_command('right', @toy_robot)
-        expect(@toy_robot.position_and_facing).to eq({:x=>0, :y=>6, :facing=>"east"})
+        @toy_robot = @command_runner.run_command('PLACE', {:x=>0, :y=>6, :facing=>'EAST'}, @board)
+        @command_runner.run_command('MOVE', nil, @board)
+        @command_runner.run_command('LEFT', nil, @board)
+        @command_runner.run_command('RIGHT', nil, @board)
+        expect(@toy_robot.x).to eq(0)
+        expect(@toy_robot.y).to eq(6)
+        expect(@toy_robot.facing).to eq('EAST')
       end
     end
   end
@@ -65,21 +71,23 @@ RSpec.describe CommandRunner, 'CommandRunner' do
   describe 'run LEFT command' do
 
     before do
-      @toy_robot = ToyRobot.new
+      @board = Board.new(4, 4)
       @command_runner = CommandRunner.new
     end
 
     {
-      'north' => 'west',
-      'east' => 'north',
-      'west' => 'west',
-      'south' => 'west'
+      'NORTH' => 'WEST',
+      'WEST' => 'SOUTH',
+      'SOUTH' => 'EAST',
+      'EAST' => 'NORTH'
     }.each do |facing, direction|
       context "facing #{facing.upcase}" do
-        it 'turns to the left' do
-          @command_runner.run_command("place 0,0,#{facing}", @toy_robot)
-          @command_runner.run_command('left', @toy_robot)
-          expect(@toy_robot.position_and_facing).to eq({:x=>0, :y=>0, :facing=>"#{direction}"})
+        it 'turns to the LEFT' do
+          @toy_robot = @command_runner.run_command('PLACE', {:x=>0, :y=>6, :facing=>"#{facing}"}, @board)
+          @command_runner.run_command('LEFT', nil, @board)
+          expect(@toy_robot.x).to eq(0)
+          expect(@toy_robot.y).to eq(6)
+          expect(@toy_robot.facing).to eq("#{direction}")
         end
       end
     end
@@ -88,21 +96,22 @@ RSpec.describe CommandRunner, 'CommandRunner' do
   describe 'run RIGHT command' do
 
     before do
-      @toy_robot = ToyRobot.new
       @command_runner = CommandRunner.new
     end
 
     {
-      'north' => 'east',
-      'east' => 'east',
-      'west' => 'south',
-      'south' => 'east'
+      'NORTH' => 'EAST',
+      'EAST' => 'SOUTH',
+      'SOUTH' => 'WEST',
+      'WEST' => 'NORTH'
     }.each do |facing, direction|
       context "facing #{facing.upcase}" do
-        it 'turns to the left' do
-          @command_runner.run_command("place 0,0,#{facing}", @toy_robot)
-          @command_runner.run_command('right', @toy_robot)
-          expect(@toy_robot.position_and_facing).to eq({:x=>0, :y=>0, :facing=>"#{direction}"})
+        it 'turns to the RIGHT' do
+          @toy_robot = @command_runner.run_command('PLACE', {:x=>0, :y=>6, :facing=>"#{facing}"}, @board)
+          @command_runner.run_command('RIGHT', nil, @board)
+          expect(@toy_robot.x).to eq(0)
+          expect(@toy_robot.y).to eq(6)
+          expect(@toy_robot.facing).to eq("#{direction}")
         end
       end
     end
@@ -111,118 +120,137 @@ RSpec.describe CommandRunner, 'CommandRunner' do
   describe 'run MOVE command' do
 
     before do
-      @toy_robot = ToyRobot.new
+      @board = Board.new(4, 4)
       @command_runner = CommandRunner.new
     end
 
     context 'positioned on table, at border facing EAST' do
       [
-        ['5,0,east', {:x=>5, :y=>0, :facing=>"east"}],
-        ['5,5,east', {:x=>5, :y=>5, :facing=>"east"}],
-        ['5,2,east', {:x=>5, :y=>2, :facing=>"east"}],
-      ].each do |input, output|
+        {:x=>4, :y=>0, :facing=>"EAST"},
+        {:x=>4, :y=>5, :facing=>"EAST"},
+        {:x=>4, :y=>2, :facing=>"EAST"},
+      ].each do |position_data|
         it 'receives MOVE command' do
-          @command_runner.run_command("place #{input}", @toy_robot)
-          @command_runner.run_command('move', @toy_robot)
-          expect(@toy_robot.position_and_facing).to eq(output)
+          @toy_robot = @command_runner.run_command('PLACE', position_data, @board)
+          @command_runner.run_command('MOVE', nil, @board)
+          expect(@toy_robot.x).to eq(position_data[:x])
+          expect(@toy_robot.y).to eq(position_data[:y])
+          expect(@toy_robot.facing).to eq(position_data[:facing])
         end
       end
     end
 
-    context 'positioned on table, NOT at border, facing EAST' do
+    context 'positioned on table, NOT at border facing EAST' do
       [
-        ['2,0,east', {:x=>3, :y=>0, :facing=>"east"}],
-        ['2,5,east', {:x=>3, :y=>5, :facing=>"east"}],
-        ['2,2,east', {:x=>3, :y=>2, :facing=>"east"}],
-      ].each do |input, output|
+        {:x=>3, :y=>0, :facing=>"EAST"},
+        {:x=>3, :y=>4, :facing=>"EAST"},
+        {:x=>3, :y=>2, :facing=>"EAST"},
+      ].each do |position_data|
         it 'receives MOVE command' do
-          @command_runner.run_command("place #{input}", @toy_robot)
-          @command_runner.run_command('move', @toy_robot)
-          expect(@toy_robot.position_and_facing).to eq(output)
+          @toy_robot = @command_runner.run_command('PLACE', position_data, @board)
+          @command_runner.run_command('MOVE', nil, @board)
+          expect(@toy_robot.x).to eq(4)
+          expect(@toy_robot.y).to eq(position_data[:y])
+          expect(@toy_robot.facing).to eq(position_data[:facing])
         end
       end
     end
 
     context 'positioned on table, at border facing WEST' do
       [
-        ['0,0,west', {:x=>0, :y=>0, :facing=>"west"}],
-        ['0,5,west', {:x=>0, :y=>5, :facing=>"west"}],
-        ['0,2,west', {:x=>0, :y=>2, :facing=>"west"}],
-      ].each do |input, output|
+        {:x=>0, :y=>0, :facing=>"WEST"},
+        {:x=>0, :y=>4, :facing=>"WEST"},
+        {:x=>0, :y=>2, :facing=>"WEST"},
+      ].each do |position_data|
         it 'receives MOVE command' do
-          @command_runner.run_command("place #{input}", @toy_robot)
-          @command_runner.run_command('move', @toy_robot)
-          expect(@toy_robot.position_and_facing).to eq(output)
+          @toy_robot = @command_runner.run_command('PLACE', position_data, @board)
+          @command_runner.run_command('MOVE', nil, @board)
+          expect(@toy_robot.x).to eq(position_data[:x])
+          expect(@toy_robot.y).to eq(position_data[:y])
+          expect(@toy_robot.facing).to eq(position_data[:facing])
         end
       end
     end
 
     context 'positioned on table, NOT at border, facing WEST' do
       [
-        ['2,0,west', {:x=>1, :y=>0, :facing=>"west"}],
-        ['2,5,west', {:x=>1, :y=>5, :facing=>"west"}],
-        ['2,2,west', {:x=>1, :y=>2, :facing=>"west"}],
-      ].each do |input, output|
+        {:x=>2, :y=>0, :facing=>"WEST"},
+        {:x=>2, :y=>4, :facing=>"WEST"},
+        {:x=>2, :y=>2, :facing=>"WEST"},
+      ].each do |position_data|
         it 'receives MOVE command' do
-          @command_runner.run_command("place #{input}", @toy_robot)
-          @command_runner.run_command('move', @toy_robot)
-          expect(@toy_robot.position_and_facing).to eq(output)
+          @toy_robot = @command_runner.run_command('PLACE', position_data, @board)
+          @command_runner.run_command('MOVE', nil, @board)
+          expect(@toy_robot.x).to eq(1)
+          expect(@toy_robot.y).to eq(position_data[:y])
+          expect(@toy_robot.facing).to eq(position_data[:facing])
         end
       end
     end
 
+
     context 'positioned on table, at border facing NORTH' do
       [
-        ['0,5,north', {:x=>0, :y=>5, :facing=>"north"}],
-        ['5,5,north', {:x=>5, :y=>5, :facing=>"north"}],
-        ['2,5,north', {:x=>2, :y=>5, :facing=>"north"}],
-      ].each do |input, output|
+        {:x=>0, :y=>4, :facing=>"NORTH"},
+        {:x=>4, :y=>4, :facing=>"NORTH"},
+        {:x=>2, :y=>4, :facing=>"NORTH"},
+      ].each do |position_data|
         it 'receives MOVE command' do
-          @command_runner.run_command("place #{input}", @toy_robot)
-          @command_runner.run_command('move', @toy_robot)
-          expect(@toy_robot.position_and_facing).to eq(output)
+          @toy_robot = @command_runner.run_command('PLACE', position_data, @board)
+          @command_runner.run_command('MOVE', nil, @board)
+          expect(@toy_robot.x).to eq(position_data[:x])
+          expect(@toy_robot.y).to eq(position_data[:y])
+          expect(@toy_robot.facing).to eq(position_data[:facing])
         end
       end
     end
 
     context 'positioned on table, NOT at border, facing NORTH' do
       [
-        ['0,2,north', {:x=>0, :y=>3, :facing=>"north"}],
-        ['5,2,north', {:x=>5, :y=>3, :facing=>"north"}],
-        ['2,2,north', {:x=>2, :y=>3, :facing=>"north"}],
-      ].each do |input, output|
+        {:x=>0, :y=>2, :facing=>"NORTH"},
+        {:x=>4, :y=>2, :facing=>"NORTH"},
+        {:x=>2, :y=>2, :facing=>"NORTH"},
+      ].each do |position_data|
         it 'receives MOVE command' do
-          @command_runner.run_command("place #{input}", @toy_robot)
-          @command_runner.run_command('move', @toy_robot)
-          expect(@toy_robot.position_and_facing).to eq(output)
+          @toy_robot = @command_runner.run_command('PLACE', position_data, @board)
+          @command_runner.run_command('MOVE', nil, @board)
+          expect(@toy_robot.x).to eq(position_data[:x])
+          expect(@toy_robot.y).to eq(3)
+          expect(@toy_robot.facing).to eq(position_data[:facing])
         end
       end
     end
+
 
     context 'positioned on table, at border facing SOUTH' do
       [
-        ['0,0,south', {:x=>0, :y=>0, :facing=>"south"}],
-        ['5,0,south', {:x=>5, :y=>0, :facing=>"south"}],
-        ['2,0,south', {:x=>2, :y=>0, :facing=>"south"}],
-      ].each do |input, output|
+        {:x=>0, :y=>0, :facing=>"SOUTH"},
+        {:x=>4, :y=>0, :facing=>"SOUTH"},
+        {:x=>2, :y=>0, :facing=>"SOUTH"},
+      ].each do |position_data|
         it 'receives MOVE command' do
-          @command_runner.run_command("place #{input}", @toy_robot)
-          @command_runner.run_command('move', @toy_robot)
-          expect(@toy_robot.position_and_facing).to eq(output)
+          @toy_robot = @command_runner.run_command('PLACE', position_data, @board)
+          @command_runner.run_command('MOVE', nil, @board)
+          expect(@toy_robot.x).to eq(position_data[:x])
+          expect(@toy_robot.y).to eq(position_data[:y])
+          expect(@toy_robot.facing).to eq(position_data[:facing])
         end
       end
     end
 
+
     context 'positioned on table, NOT at border, facing SOUTH' do
       [
-        ['0,2,south', {:x=>0, :y=>1, :facing=>"south"}],
-        ['5,2,south', {:x=>5, :y=>1, :facing=>"south"}],
-        ['2,2,south', {:x=>2, :y=>1, :facing=>"south"}],
-      ].each do |input, output|
+        {:x=>0, :y=>2, :facing=>"SOUTH"},
+        {:x=>4, :y=>2, :facing=>"SOUTH"},
+        {:x=>2, :y=>2, :facing=>"SOUTH"},
+      ].each do |position_data|
         it 'receives MOVE command' do
-          @command_runner.run_command("place #{input}", @toy_robot)
-          @command_runner.run_command('move', @toy_robot)
-          expect(@toy_robot.position_and_facing).to eq(output)
+          @toy_robot = @command_runner.run_command('PLACE', position_data, @board)
+          @command_runner.run_command('MOVE', nil, @board)
+          expect(@toy_robot.x).to eq(position_data[:x])
+          expect(@toy_robot.y).to eq(1)
+          expect(@toy_robot.facing).to eq(position_data[:facing])
         end
       end
     end
