@@ -10,7 +10,7 @@ RSpec.describe PositionDataValidator, 'PositionDataValidator' do
   end
 
   context 'receives correct input' do
-    ['north','east','west', 'south'].each do |direction|
+    ['NORTH','EAST','WEST', 'SOUTH'].each do |direction|
       it "receives correct input with direction #{direction}" do
         expect(@object.valid_position_data?(['0','0',direction])).to eq(true)
       end
