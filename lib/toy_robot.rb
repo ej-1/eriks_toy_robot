@@ -6,6 +6,15 @@ class ToyRobot
 
   attr_accessor :position_and_facing
 
+  # tell and ask. you could passin a object for one command.
+  # class for each comand that each has a send method.
+  # separate out so the test simpler.
+  # single responsibility.
+  # sandi metz - practical object oriented programming.
+  # reading others people code.
+  # confident ruby - afdi grimm
+
+  # robot.command.self.
   def send_method(command, position_data)
     if command
       if position_data
@@ -23,7 +32,7 @@ class ToyRobot
   end
 
   def place(position_data) #=> {x: 0, y: 1, facing: west}
-    @position_and_facing = 
+    @position_and_facing =
     {
       x: position_data[0].to_i,
       y: position_data[1].to_i,
@@ -100,6 +109,14 @@ class ToyRobot
       'south' =>  {x: 0,  y: -1}
     }
   end
+
+# dont use raisl. Its a CLI.
+# use separare object from position_and_facing
+#0,5 is 6 points
+#should ask questions if not sure. how you understand the insutrctions.
+#what if changing left and right.
+#what if undo the last command. store the previous state.
+
 
   def move
     robot_facing_direction = position_and_facing[:facing]
