@@ -1,4 +1,4 @@
-require 'facing_instructions.rb'
+require './lib/facing_instructions.rb'
 
 class Right
   extend FacingInstructions
