@@ -4,6 +4,8 @@ class Left
   extend FacingInstructions
 
   def self.execute(toy_robot)
-    toy_robot.facing = facing_instructions.key(toy_robot.facing)
+    if toy_robot.placed_on_board?
+      toy_robot.facing = facing_instructions.key(toy_robot.facing)
+    end
   end
 end
