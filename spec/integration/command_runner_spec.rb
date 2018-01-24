@@ -83,10 +83,10 @@ RSpec.describe CommandRunner, 'CommandRunner' do
     }.each do |facing, direction|
       context "facing #{facing.upcase}" do
         it 'turns to the LEFT' do
-          @toy_robot = @command_runner.run_command('PLACE', {:x=>0, :y=>6, :facing=>"#{facing}"}, @board)
+          @toy_robot = @command_runner.run_command('PLACE', {:x=>0, :y=>4, :facing=>"#{facing}"}, @board)
           @command_runner.run_command('LEFT', nil, @board)
           expect(@toy_robot.x).to eq(0)
-          expect(@toy_robot.y).to eq(6)
+          expect(@toy_robot.y).to eq(4)
           expect(@toy_robot.facing).to eq("#{direction}")
         end
       end
@@ -96,6 +96,7 @@ RSpec.describe CommandRunner, 'CommandRunner' do
   describe 'run RIGHT command' do
 
     before do
+      @board = Board.new(4, 4)
       @command_runner = CommandRunner.new
     end
 
@@ -107,10 +108,10 @@ RSpec.describe CommandRunner, 'CommandRunner' do
     }.each do |facing, direction|
       context "facing #{facing.upcase}" do
         it 'turns to the RIGHT' do
-          @toy_robot = @command_runner.run_command('PLACE', {:x=>0, :y=>6, :facing=>"#{facing}"}, @board)
+          @toy_robot = @command_runner.run_command('PLACE', {:x=>0, :y=>4, :facing=>"#{facing}"}, @board)
           @command_runner.run_command('RIGHT', nil, @board)
           expect(@toy_robot.x).to eq(0)
-          expect(@toy_robot.y).to eq(6)
+          expect(@toy_robot.y).to eq(4)
           expect(@toy_robot.facing).to eq("#{direction}")
         end
       end
