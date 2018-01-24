@@ -14,3 +14,7 @@
 ´bundle exec rspec´
 
 * Run application with `ruby main.rb`
+
+* Refactoring notes
+- CommandRunner should have single resposibility. It should only run commands, therefore move CommandValidator to main.rb
+- CommandRunner know the Commands classes. Does it know to much?
