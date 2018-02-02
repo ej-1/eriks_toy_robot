@@ -1,128 +1,31 @@
-require 'pry'
-require_relative 'position_data_validator'
+# Starting out the robot only needs to know about itself.
+# It just needs to know it's position on the board
+# and which way it is facing.
+# It could be argued that the robot must know about the board to know its position
+# alternatively the board hold the position info about the robot.
 
+# Toyrobot should not be able to receive other than integers for x, y
+# and not unvalid facings.
 class ToyRobot
-  include PositionDataValidator
+  attr_reader :board
+  attr_accessor :x, :y, :facing
 
-  attr_accessor :position_and_facing
-
-  def send_method(command, position_data)
-    if command
-      if position_data
-        send(command, position_data)
-      elsif valid_place_command_has_been_issued? && on_table?
-        send(command)
-      end
-    end
+  def initialize(args)
+    @x          = args[:x]
+    @y          = args[:y]
+    @facing     = args[:facing]
+    @board      = args[:board] # find a way to perhaps extract board later.
   end
 
-  private
-
-  def valid_place_command_has_been_issued?
-    !position_and_facing.nil?
+  # Here it needs to know about board, might be ok,
+  # since ToyRobot does not start out needing to know about board.
+  def placed_on_board?
+    toy_robot_position = {x: self.x, y: self.y}
+    board.coordinates.include? toy_robot_position
   end
 
-  def place(position_data) #=> {x: 0, y: 1, facing: west}
-    @position_and_facing = 
-    {
-      x: position_data[0].to_i,
-      y: position_data[1].to_i,
-      facing: position_data[2]
-    }
-  end
-
-  # TURN RIGHT
-  #          N
-  #          |--------+
-  #          |        |
-  #          |        v
-  # W--------|--------E
-  # |        |        ^
-  # |        |        |
-  # |        |        |
-  # +------> S--------+
-
-  def right
-    change_direction({
-      'north' => 'east',
-      'east' => 'east',
-      'south' => 'east',
-      'west' => 'south',
-    })
-  end
-
-  # TURN LEFT
-  #          N
-  # +--------|<-------+
-  # |        |        |
-  # v        |        |
-  # W--------|--------E
-  # ^        |
-  # |        |
-  # |        |
-  # +------  S
-
-  def left
-    change_direction({
-      'north' => 'west',
-      'east' => 'north',
-      'south' => 'west',
-      'west' => 'west',
-    })
-  end
-
-  def change_direction(directions_hash)
-    new_direction = directions_hash[position_and_facing[:facing]]
-    position_and_facing[:facing] = new_direction
-  end
-
-  def report
-    puts position_and_facing.values
-  end
-
-  #   x:0,y:5         x:5,y:5
-  #    +----------------+
-  #    |                |
-  #    |                |
-  #    |                |
-  #    |                |
-  #    |                |
-  #    |                |
-  #    +----------------+
-  #   x:0,y:0        x:5,y:0
-
-  def movement_instructions
-    {
-      #'facing' => how to increment or decrement current x and y coordinates.
-      'east'  =>  {x: 1,  y: 0},
-      'west'  =>  {x: -1, y: 0},
-      'north' =>  {x: 0,  y: 1},
-      'south' =>  {x: 0,  y: -1}
-    }
-  end
-
-  def move
-    robot_facing_direction = position_and_facing[:facing]
-    unless at_edge_facing_outward?(robot_facing_direction)
-      position_and_facing[:x] += movement_instructions[robot_facing_direction][:x]
-      position_and_facing[:y] += movement_instructions[robot_facing_direction][:y]
-    end
-  end
-
-  def at_edge_facing_outward?(direction)
-    relevant_border_axis_coordinate = {
-      'east'  =>  ['x', 5],
-      'west'  =>  ['x', 0],
-      'north' =>  ['y', 5],
-      'south' =>  ['y', 0]
-    }[direction]
-    robot_axis_coordinate = position_and_facing[relevant_border_axis_coordinate.first.to_sym]
-    robot_axis_coordinate == relevant_border_axis_coordinate.last
-  end
-
-  def on_table?
-    if !position_and_facing.nil?
-      position_and_facing[:x].between?(0, 5) && position_and_facing[:y].between?(0, 5)
-    end
+  def execute(command)
+    command.execute(self) # page 93 in POODR. Now the toy_robot executes commands,
+                          # instead of command executing robot.
   end
 end

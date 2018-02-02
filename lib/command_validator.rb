@@ -1,33 +1,43 @@
 require_relative 'position_data_validator'
 
 module CommandValidator
+  VALID_COMMANDS = ['PLACE', 'LEFT', 'RIGHT', 'MOVE', 'REPORT']
+
   include PositionDataValidator
 
-  def valid_commands
-    ['place', 'left', 'right', 'move', 'report']
-  end
-
   def parse_and_validate_input(input)
-    command, position_data = parse_input(input)
-    if is_place_command?(command) && valid_position_data?(position_data)
-      return command, position_data
-    else
-      return valid_command?(command)
+    # What the method should do:
+    # separate into array.
+    # Check command.
+    # if the command is valid, check that the rest of the input conforms to position format standard.
+    # if it conforms send command and position data
+    # else if only command, send only command.
+
+    input_array = input.split(' ')
+
+    command         = input_array.first
+    remaining_input = input_array.pop
+    
+    if valid_command?(command)
+      position_data = remaining_input.split(',')
+      if is_place_command?(command) && valid_position_data?(position_data)
+        position_hash = { x: position_data.first.to_i,
+                          y: position_data[1].to_i, # add check for valid position data before this to avoid .to_i blowing up before.
+                          facing: (position_data.last.upcase if position_data.last.upcase) }
+        return [command.upcase, position_hash]
+      else
+        [command.upcase, nil]
+      end
     end
   end
 
-  def parse_input(input)
-    input_array = input.split(' ')
-    command = input_array.first.downcase
-    position_data = input_array.last.downcase.split(',')
-    [command, position_data]
-  end
+  private
 
   def is_place_command?(command)
-    command == 'place'
+    command == 'PLACE'
   end
 
   def valid_command?(command)
-    valid_commands.find { |valid_command| command === valid_command }
+    VALID_COMMANDS.find { |valid_command| command.upcase == valid_command }
   end
 end
